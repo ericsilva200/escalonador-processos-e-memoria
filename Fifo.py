@@ -24,7 +24,7 @@ class Fifo:
     self.TurnAroundLabel.config(text="TURNROUND - " + str(Turnaround/ProcessList.size))
     return Turnaround/ProcessList.size
   
-  def FIFO(self, ProcessArray):
+  def Fifo(self, ProcessArray):
     CopyArray = np.array([])
 
     for process in ProcessArray:
