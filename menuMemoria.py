@@ -1,0 +1,3 @@
+
+def menuMemoria():
+  return 
