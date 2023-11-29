@@ -12,29 +12,30 @@ def janelaLRU():
 
     if pf == "yes":
       texto = "Page Fault"
-      textoPF = Label(memoriaLRU, text=texto, anchor="center", fg="blue", font=('Arial', 13))
+      textoPF = Label(memoriaLRU, text=texto, anchor="center", fg="green", font=('Arial', 13))
       textoPF.place(x=485, y=185)
+      
 
     if pf == "no":
-      textoPF = Label(memoriaLRU, text="          ", anchor="center", fg="blue", font=('Arial', 13))
+      textoPF = Label(memoriaLRU, anchor="center", fg="blue", font=('Arial', 13), text="               ")
       textoPF.place(x=485, y=185)      
       textoPF.grid_remove()
 
   def candidato_a_sair():
-    titCandidato = Label(memoriaLRU, text="Valor Candidato a Sair", anchor="center", fg="black", font=('Arial', 13))
+    titCandidato = Label(memoriaLRU, text="Valor Candidato a Sair: ", anchor="center", fg="black", font=('Arial', 13))
     titCandidato.place(x=70, y=130)
 
-    txtCandidato = Label(memoriaLRU, text=mem_fisica[0], anchor="center", fg="red", font=('Arial', 16))
-    txtCandidato.place(x=150, y=160)
+    txtCandidato = Label(memoriaLRU, text=mem_fisica[0], anchor="center", fg="blue", font=('Arial', 16))
+    txtCandidato.place(x=70, y=160)
 
     if len(pegarValores) > len(mem_fisica):
       tam = len(pegarValores) - len(mem_fisica)
-      textoForaMem = Label(memoriaLRU, text="Valores Retirados da Memória: ", anchor="center", font=('Arial', 13))
-      textoForaMem.place(x=335, y=385)
+      textoForaMem = Label(memoriaLRU, text="Valores Retirados da Memória: ", anchor="center", fg="black", font=('Arial', 13))
+      textoForaMem.place(x=70, y=230)
       x=10
       for i in range(tam):
-        textoForaMem2 = Label(memoriaLRU, text=pegarValores[i], anchor="center", font=('Arial', 13))
-        textoForaMem2.place(x=335, y=405)
+        textoForaMem2 = Label(memoriaLRU, text=pegarValores[i], anchor="center", fg="red", font=('Arial', 16))
+        textoForaMem2.place(x=70, y=260)
         x+=25
 
   def armazenar_valores():

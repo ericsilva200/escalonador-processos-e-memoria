@@ -16,7 +16,7 @@ def janelaFifo(num_page):
 
     if pf == "yes":
       texto = "Page Fault"
-      textoPF = Label(memoriaFifo, text=texto, anchor="center", fg="blue", font=('Arial', 13))
+      textoPF = Label(memoriaFifo, text=texto, anchor="center", fg="green", font=('Arial', 13))
       textoPF.place(x=485, y=185)
 
     if pf == "no":
