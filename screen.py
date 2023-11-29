@@ -21,7 +21,7 @@ class Process:
 
   def returnData(self):
     return {'process_id': self.process_id, 'exec_time' : self.exec_time, 'init_time': self.init_time, 'deadline': self.deadline, 'priority' : self.priority, 'status' : self.status}
-
+  
 
 def root():
   #id de processo
@@ -30,10 +30,10 @@ def root():
 
   #janela principal da aplicação
   root = Tk()
-  root.title("Escalonador de Processos e Simulador de Memória")
+  root.title("Escalonador de Processos")
   scnwidth = root.winfo_screenwidth()
   scnheight = root.winfo_screenheight()
-  #root.geometry(f"{scnwidth}x{scnheight}+0+0")
+  root.geometry(f"{scnwidth}x{scnheight}+0+0")
   root.configure(bg='#d1d1d1')
 
   #Declarando DataFrame de processos
@@ -69,6 +69,13 @@ def root():
   #frame para gráfico dos processos
   gantt_frame = Frame(root, width=1200, height=400)
   gantt_frame.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
+
+  #botão e método para abrir simulador de memoria
+  def memButton():
+    menuMemoria()
+    root.destroy()
+  memoria_button = Button(root, text="Simulador de Memória", command=memButton)
+  memoria_button.grid(row=2, column=2)
 
   #botão e método para criar processo e eliminar processo
   def newProcess():
