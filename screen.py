@@ -7,7 +7,8 @@ import pandas as pd
 import tkinter as tk
 from tkinter import *
 from menuMemoria import *
-import Process 
+import Process
+import time
 
 #Classe Process: Usada para criar um objeto, o qual será adicionado ao DataFrame de lista de processos (process_list) através da janela "Criar Processo"
 class Process:
@@ -40,35 +41,72 @@ def root():
   global process_list
   process_list = pd.DataFrame(columns=['process_id', 'exec_time', 'init_time', 'deadline', 'priority', 'status'])
 
+  #frame para gráfico dos processos
+  gantt_frame = Frame(root, width=1200, height=400)
+  gantt_frame.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
+  
+  #método para inicializar o processamento
   def submitProcessData():
-    #num_process = int(process_input.get())
     quantum = int(quantum_input.get())
     overload = int(overload_input.get())
-    #process_window(num_process, quantum, overload)
+    algorithm_exec = algorithm.get()
+    global process_list
+    process_total = process_list.shape[0] #quantidade de processos
+    process_index = process_list.shape[1] #quantidade de atributos do processo
+
+    for x in range(process_total):
+      process_label = Entry(gantt_frame)
+      process_label.grid(row=x, column=0, padx=5, pady=5)
+      process_label.insert(END, 'Processo ID ')
+      process_label.insert(END, process_list.iloc[x, 0])
+    
+    if (algorithm_exec == "FIFO"):
+      process = Fifo(quantum, overload, process_list)
+    
+    processor_clock = 0
+    while (True):
+      sleep(1)
+      process_listTemp = process.clock_exec()
+      for x in range(process_total):
+        #status: none, executando, finalizado, fila
+        if (process_listTemp.iloc[x,5] == "none"):
+          data_temp = Entry(gantt_frame, bg='light-gray')
+          data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
+        elif (process_listTemp.iloc[x,5] == "executando"):
+          data_temp = Entry(gantt_frame, bg='green')
+          data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
+        elif (process_listTemp.iloc[x,5] == "fila"):
+          data_temp = Entry(gantt_frame, bg='dark-gray')
+          data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
+        
+        processor_clock= processor_clock+1
+
+      if (process.exec_check == 0):
+        break
 
   #frame p/ gerenciar aplicação
   manage_frame = Frame(root, width=400, height=200)
   manage_frame.grid(row=0, column=0, padx=5, pady=5)
 
-  #input para atualizar quantum
+  algorithm = StringVar()
+  algorithm.set("FIFO")
+  algorithm_label = Label(manage_frame, text="Algoritmo:")
+  algorithm_label.grid(row=3, column=2)
+  algorithm_menu = OptionMenu(manage_frame, algorithm, "FIFO", "SJF", "RR", "EDF")
+  algorithm_menu.grid(row=3, column=3)
+
   quantum_label = Label(manage_frame, text="Quantum")
   quantum_label.grid(row=2, column=0)
   quantum_input = Entry(manage_frame)
   quantum_input.grid(row=2, column=1)
 
-  #input para atualizar sobrecarga
   overload_label = Label(manage_frame, text="Sobrecarga")
   overload_label.grid(row=2, column=3)
   overload_input = Entry(manage_frame)
   overload_input.grid(row=2, column=4)
 
-  #frame para lista de processos
-  process_frame = Frame(root, width=800, height=200)
-  process_frame.grid(row=0, column=1, padx=5, pady=5)
-
-  #frame para gráfico dos processos
-  gantt_frame = Frame(root, width=1200, height=400)
-  gantt_frame.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
+  start_button = Button(manage_frame, text="Iniciar simulação", command=submitProcessData)
+  start_button.grid(row=3, column=4, padx=10, pady=10)
 
   #botão e método para abrir simulador de memoria
   def memButton():
@@ -111,11 +149,8 @@ def root():
       deadline = deadline_entry.get()
       priority = priority_entry.get()
       process_temp = Process(process_id, exec_time, init_time, deadline, priority)
-      #abaixo: DataFrame temporário com os dados do processo a ser criado
       process_tempDataFrame = pd.DataFrame([process_temp.returnData()])
-      #abaixo: Array de DataFrames, contendo a lista de processos e o novo processo
       process_array = [process_list, process_tempDataFrame]
-      #abaixo: Concatena os dois dataframes em process_list
       process_list = pd.concat(process_array)
       process_id = process_id+1
       processListingTable()
@@ -151,7 +186,10 @@ def root():
   endprocess_button = Button(manage_frame, text="Eliminar Processo", command=killProcess)
   endprocess_button.grid(row=3, column=1, padx=10, pady=10)
 
-  #método para listar todos os processos na Frame process_frame
+  #frame para lista de processos
+  process_frame = Frame(root, width=800, height=200)
+  process_frame.grid(row=0, column=1, padx=5, pady=5)
+
   def processListingTable():
     id_label = Label(process_frame, text="ID Processo")
     id_label.grid(row=0, column=0, padx=15, pady=5)
@@ -175,12 +213,8 @@ def root():
         data_temp = Entry(process_frame)
         data_temp.grid(row=x+1, column=y, padx=5, pady=5)
         data_temp.insert(END, process_list.iloc[x, y])
+  
 
-
-
-  #botão para executar o simulador de processos
-  start_button = Button(manage_frame, text="Iniciar simulação", command=submitProcessData)
-  start_button.grid(row=3, column=4, padx=10, pady=10)
 
   root.mainloop()
 
