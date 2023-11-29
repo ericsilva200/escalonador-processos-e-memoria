@@ -72,10 +72,10 @@ def root():
 
   #botão e método para abrir simulador de memoria
   def memButton():
-    menuMemoria()
     root.destroy()
+    menuMemoria()
   memoria_button = Button(root, text="Simulador de Memória", command=memButton)
-  memoria_button.grid(row=2, column=2)
+  memoria_button.grid(row=2, column=1)
 
   #botão e método para criar processo e eliminar processo
   def newProcess():
@@ -118,6 +118,7 @@ def root():
       #abaixo: Concatena os dois dataframes em process_list
       process_list = pd.concat(process_array)
       process_id = process_id+1
+      processListingTable()
       newprocess.destroy()
 
     submit_button = Button(newprocess, text="Criar Processo", command=submitNewProcess)
@@ -134,6 +135,33 @@ def root():
 
   endprocess_button = Button(manage_frame, text="Eliminar Processo", command=killProcess)
   endprocess_button.grid(row=3, column=1, padx=10, pady=10)
+
+  #método para listar todos os processos na Frame process_frame
+  def processListingTable():
+    id_label = Label(process_frame, text="ID Processo")
+    id_label.grid(row=0, column=0, padx=15, pady=5)
+    exec_timelabel = Label(process_frame, text="Tempo de Execução")
+    exec_timelabel.grid(row=0, column=1, padx=15, pady=5)
+    init_timelabel = Label(process_frame, text="Tempo de Início")
+    init_timelabel.grid(row=0, column=2, padx=15, pady=5)
+    deadline_label = Label(process_frame, text="Deadline")
+    deadline_label.grid(row=0, column=3, padx=15, pady=5)
+    priority_label = Label(process_frame, text="Prioridade")
+    priority_label.grid(row=0, column=4, padx=15, pady=5)
+    status_label = Label(process_frame, text="Status")
+    status_label.grid(row=0, column=5, padx=15, pady=5)
+
+    global process_list
+    process_total = len(process_list)
+    process_index = len(process_list.columns)
+
+    for x in range(process_total):
+      for y in range(process_index):
+        data_temp = Entry(process_frame)
+        data_temp.grid(row=x, column=y, padx=5, pady=5)
+        data_temp.insert(END, process_list.loc[x, y])
+
+
 
   #botão para executar o simulador de processos
   start_button = Button(manage_frame, text="Iniciar simulação", command=submitProcessData)
