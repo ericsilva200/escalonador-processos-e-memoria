@@ -93,9 +93,9 @@ def janelaLRU():
   x, y = 10, 10
   for i in range(8):
     quadrado = canvas.create_rectangle(x, y, x+80, y+20, outline="black")
-    texto = canvas.create_text(x=40, y=10, text="")
+    texto = canvas.create_text(x+40, y+10, text="")
     quadrados.append(texto)
-    y +=25
+    y+=25
 
     #imprime o valor de indice do lado da tabela
     textoIndice = Label(memoriaLRU, text=i, anchor="center")
@@ -108,11 +108,11 @@ def janelaLRU():
 
   #Botão
   botao_adicionar = tk.Button(memoriaLRU, text="Adicionar", command=armazenar_valores)
-  botao_adicionar.place(x=40, y=35)
+  botao_adicionar.place(x=40, y=15)
 
   mem_fisica = []
   pegarValores = []
 
   #Iniciar o Loop principal
-  memoriaLRU.miniloop()
+  memoriaLRU.mainloop()
     

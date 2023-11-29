@@ -16,27 +16,22 @@ def menuMemoria():
   pages_input = Entry(justify="center")
   pages_input.place(x=200, y=120)
 
-  num_pag = int(pages_input.get())
-
-  def next_window():
-      
-      memoriaFifo = janelaFifo(num_pag)
+  def next_window_lru():
       memoriaLRU = janelaLRU()
+      memoriaLRU.janelaLRU()
 
-      print(pages_algorithm)
-      if pages_algorithm == "FIFO":
-           memoriaFifo.janelaFifo(num_pag)
-      elif pages_algorithm == "LRU":
-            memoriaLRU.janelaLRU()
+  def next_window_fifo():
+      num_pag = int(pages_input.get())
+      memoriaFifo = janelaFifo(num_pag)
+      memoriaFifo.janelaFifo(num_pag)
+            
 
-  conffirm_button = Button(window, text="Avançar", command=next_window)
-  conffirm_button.place(x=260, y=260)
+  fifo_button = Button(window, text="FIFO", command=next_window_fifo)
+  fifo_button.place(x=260, y=260)
 
-  pages = StringVar()
-  pages.set('FIFO')
-  page_menu = OptionMenu(window, pages, "FIFO", "LRU")
-  page_menu.place(x=120+180, y=70+230)
-  pages_algorithm = pages.get()
+  lru_button = Button(window, text="LRU", command=next_window_lru)
+  lru_button.place(x=230, y=260)
+  
 
   window.mainloop()
 

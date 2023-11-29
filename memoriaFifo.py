@@ -20,7 +20,7 @@ def janelaFifo(num_page):
       textoPF.place(x=485, y=185)
 
     if pf == "no":
-      textoPF = Label(memoriaFifo, text="          ", anchor="center", fg="blue", font=('Arial', 13))
+      textoPF = Label(memoriaFifo, anchor="center", fg="blue", font=('Arial', 13), text="               ")
       textoPF.place(x=485, y=185)      
       textoPF.grid_remove()
 
@@ -32,8 +32,8 @@ def janelaFifo(num_page):
       textoIndice2.place(x=45, y=130)
       y+=25
 
-    if len(mem_virtual) == len(numPag):
-      entrada.configure(status="disabled")
+    if len(mem_virtual) == numPag:
+      entrada.configure(state="disabled")
 
     atualizar_pilha_vir()
 
@@ -42,7 +42,7 @@ def janelaFifo(num_page):
     for i in range(len(mem_virtual)):
       if i < len(mem_virtual) and i < 8:
         canvas2.itemconfigure(quadrados2[i], text=i)
-      elif i > 8:
+      elif i >= 8:
         cont += 1
         canvas2.itemconfigure(quadrados2[i], text=cont)
       else:
@@ -98,11 +98,11 @@ def janelaFifo(num_page):
 
   #Criar a janela
   memoriaFifo = tk.Tk()
-  memoriaFifo.titles("Algoritmo FIFO")
+  memoriaFifo.title("Algoritmo FIFO")
   memoriaFifo.geometry("750x650+500+150")
 
   #Criar o canvas para exibir os quadrados de memoria fisica
-  canvas = tk.Canvas(memoriaFifo, width=100, height=200)
+  canvas = tk.Canvas(memoriaFifo, width=100, height=205)
   canvas.place(x=340, y=130)
  
   titulo = Label(memoriaFifo, text="Memória Física", anchor="center")
@@ -113,9 +113,9 @@ def janelaFifo(num_page):
   x, y = 10, 10
   for i in range(8):
     quadrado = canvas.create_rectangle(x, y, x+80, y+20, outline="black")
-    texto = canvas.create_text(x=40, y=10, text="")
+    texto = canvas.create_text(x+40, y+10, text="")
     quadrados.append(texto)
-    y +=25
+    y+=25
 
     #imprime o valor de indice do lado da tabela
     textoIndice = Label(memoriaFifo, text=i, anchor="center")
@@ -131,11 +131,12 @@ def janelaFifo(num_page):
   #Cria os quadrados dentro do canvas da memoria virtual
   quadrados2 = []
   x, y = 10, 10
-  for i in range(int(numPag)):
+  for i in range(numPag):
     quadrado2 = canvas2.create_rectangle(x, y, x+80, y+20, outline="black")
-    texto2 = canvas2.create_text(x=40, y=10, text="")
+    texto2 = canvas2.create_text(x+40, y+10, text="")
     quadrados2.append(texto2)
     y+=25
+    
 
   #Criar os widgets
   entrada = tk.Entry(memoriaFifo)
@@ -143,14 +144,14 @@ def janelaFifo(num_page):
 
   #Botão
   botao_adicionar = tk.Button(memoriaFifo, text="Adicionar", command=armazenar_valores)
-  botao_adicionar.place(x=40, y=35)
+  botao_adicionar.place(x=40, y=15)
 
   mem_fisica = []
   mem_virtual = []
   pegarValores = []
 
   #Iniciar o Loop principal
-  memoriaFifo.miniloop()
+  memoriaFifo.mainloop()
     
 
 
