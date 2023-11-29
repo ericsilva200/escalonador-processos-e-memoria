@@ -127,11 +127,47 @@ def root():
   newprocess_button = Button(manage_frame, text="Criar Processo", command=newProcess)
   newprocess_button.grid(row=3, column=0, padx=10, pady=10)
 
+  #APRESENTA ERRO método para eliminar um processo da lista
   def killProcess():
     endprocess = Tk()
-    endprocess.tittle("Eliminar processo")
-    endprocess.geometry("400x100")
+    endprocess.title("Eliminar processo")
     endprocess.configure(bg='#d1d1d1')
+    text_label = Label(endprocess, text="ID do processo: ")
+    text_label.grid(row=0, column=0, padx=10, pady=10)
+    killProcess_entry = Entry(endprocess)
+    killProcess_entry.grid(row=0, column=1, padx=10, pady=10)
+
+    def confirmKill():
+      index_process = killProcess_entry.get()
+      global process_list
+      index_table = process_list.index[['process_id'] == index_process].tolist()
+      process_list = process_list.drop(int(index_table))
+      endprocess.destroy()
+      '''Se der ruim, apague a partir daqui'''
+      id_label = Label(process_frame, text="ID Processo")
+      id_label.grid(row=0, column=0, padx=15, pady=5)
+      exec_timelabel = Label(process_frame, text="Tempo de Execução")
+      exec_timelabel.grid(row=0, column=1, padx=15, pady=5)
+      init_timelabel = Label(process_frame, text="Tempo de Início")
+      init_timelabel.grid(row=0, column=2, padx=15, pady=5)
+      deadline_label = Label(process_frame, text="Deadline")
+      deadline_label.grid(row=0, column=3, padx=15, pady=5)
+      priority_label = Label(process_frame, text="Prioridade")
+      priority_label.grid(row=0, column=4, padx=15, pady=5)
+      status_label = Label(process_frame, text="Status")
+      status_label.grid(row=0, column=5, padx=15, pady=5)
+
+      process_total = process_list.shape[0]
+      process_index = process_list.shape[1]
+
+      for x in range(process_total):
+        for y in range(process_index):
+          data_temp = Entry(process_frame)
+          data_temp.grid(row=x+1, column=y, padx=5, pady=5)
+          data_temp.insert(END, process_list.iloc[x, y])
+      '''Até aqui'''
+    kill_button = Button(endprocess, text="Confirmar", command=confirmKill)
+    kill_button.grid(row=2, column=1, padx=10, pady=10)
 
   endprocess_button = Button(manage_frame, text="Eliminar Processo", command=killProcess)
   endprocess_button.grid(row=3, column=1, padx=10, pady=10)
