@@ -9,272 +9,129 @@ from tkinter import *
 from menuMemoria import *
 import Process 
 
-def window():
-  window = Tk()
-  window.title("Escalonador de Processos e de Memória")
-  window.geometry("400x400")
-  window.resizable(False, False)
-  window.configure(bg='#cf9416')
-  #window.iconbitmap('./images/icon.ico')
+#Classe Process: Usada para criar um objeto, o qual será adicionado ao DataFrame de lista de processos (process_list) através da janela "Criar Processo"
+class Process:
+  def __init__(self, process_id, exec_time, init_time, deadline, priority):
+    self.process_id = process_id
+    self.exec_time = exec_time
+    self.init_time = init_time
+    self.deadline = deadline
+    self.priority = priority
+    self.status = "none"
 
-  def chamarMemoria():
-    window.destroy()
-    #Função da Classe menuMemoria
-    menuMemoria()
+  def returnData(self):
+    return {'process_id': self.process_id, 'exec_time' : self.exec_time, 'init_time': self.init_time, 'deadline': self.deadline, 'priority' : self.priority, 'status' : self.status}
 
-  memory_button = Button(window, text="Memória", command=chamarMemoria)
-  memory_button.place(x=70, y=70)
 
-  process_label = Label(window, text="Quantidade de Processos", anchor="center")
-  process_label.place(x=70, y=120)
-  process_input = Entry(justify="center")
-  process_input.place(x=200, y=120)
+def root():
+  #id de processo
+  global process_id
+  process_id=0
 
-  quantum_label = Label(window, text="Quantum", anchor="center")
-  quantum_label.place(x=70, y=150)
-  quantum_input = Entry(justify="center")
-  quantum_input.place(x=200, y=150)
+  #janela principal da aplicação
+  root = Tk()
+  root.title("Escalonador de Processos e Simulador de Memória")
+  scnwidth = root.winfo_screenwidth()
+  scnheight = root.winfo_screenheight()
+  #root.geometry(f"{scnwidth}x{scnheight}+0+0")
+  root.configure(bg='#d1d1d1')
 
-  overload_label = Label(window, text="Sobrecarga", anchor="center")
-  overload_label.place(x=70, y=180)
-  overload_input = Entry(justify="center")
-  overload_input.place(x=200, y=180)
+  #Declarando DataFrame de processos
+  global process_list
+  process_list = pd.DataFrame(columns=['process_id', 'exec_time', 'init_time', 'deadline', 'priority', 'status'])
 
-  def next_window():
-    num_process = int(process_input.get())
+  def submitProcessData():
+    #num_process = int(process_input.get())
     quantum = int(quantum_input.get())
     overload = int(overload_input.get())
-    window.destroy()
-    process_window(num_process, quantum, overload)
+    #process_window(num_process, quantum, overload)
 
-  conffirm_button = Button(window, text="Confirmar", command=next_window)
-  conffirm_button.place(x=260, y=260)
-  window.mainloop()
+  #frame p/ gerenciar aplicação
+  manage_frame = Frame(root, width=400, height=200)
+  manage_frame.grid(row=0, column=0, padx=5, pady=5)
 
-def process_window(num_process, quantum, overload):
-  root= Tk()
-  root.geometry('600x600')
-  root.resizable(False, False)
-  #root.iconbitmap('./images/icon.ico')
-  root.configure(bg='#cf9416')
+  #input para atualizar quantum
+  quantum_label = Label(manage_frame, text="Quantum")
+  quantum_label.grid(row=2, column=0)
+  quantum_input = Entry(manage_frame)
+  quantum_input.grid(row=2, column=1)
 
-  process_data = ()
-  actual_process = 0
-  y_position = 70
-  x_position = 120
+  #input para atualizar sobrecarga
+  overload_label = Label(manage_frame, text="Sobrecarga")
+  overload_label.grid(row=2, column=3)
+  overload_input = Entry(manage_frame)
+  overload_input.grid(row=2, column=4)
 
-  label_process = Label(root, text=f'ID: {actual_process}')
-  label_process.place(x=x_position, y=y_position)
+  #frame para lista de processos
+  process_frame = Frame(root, width=800, height=200)
+  process_frame.grid(row=0, column=1, padx=5, pady=5)
 
-  label_t0 = Label(root, text=f'Tempo Inicial: ')
-  label_t0.place(x=x_position, y=y_position+25)
-  init_entry = Entry(root, text="Tempo Inicial: ")
-  init_entry.place(x=x_position+150, y=y_position+25)
+  #frame para gráfico dos processos
+  gantt_frame = Frame(root, width=1200, height=400)
+  gantt_frame.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
 
-  label_t_exec = Label(root, text=f'Tempo de Execução: ')
-  label_t_exec.place(x=x_position, y=y_position+50)
-  exec_entry = Entry(root, text="Tempo de Execução: ")
-  exec_entry.place(x=x_position+150, y=y_position+50)
-  
-  label_deadline = Label(root, text=f'Deadline: ')
-  label_deadline.place(x=x_position, y=y_position+75)
-  dead_entry = Entry(root, text="Deadline: ")
-  dead_entry.place(x=x_position+150, y=y_position+75)
+  #botão e método para criar processo e eliminar processo
+  def newProcess():
+    newprocess = Tk()
+    newprocess.title("Criar novo processo")
+    newprocess.geometry("400x400")
+    newprocess.configure(bg='#d1d1d1')
 
-  label_priority = Label(root, text=f'Prioridade: ')
-  label_priority.place(x=x_position, y=y_position+100)
-  pri_entry = Entry(root, text="Prioridade: ")
-  pri_entry.place(x=x_position+150, y=y_position+100)
+    init_label = Label(newprocess, text='Tempo de Entrada:')
+    init_label.grid(row=0, column=0, padx=5, pady=10)
+    exec_label = Label(newprocess, text='Tempo de Execução:')
+    exec_label.grid(row=1, column=0, padx=5, pady=10)
+    deadline_label = Label(newprocess, text='Deadline:')
+    deadline_label.grid(row=2, column=0, padx=5, pady=10)
+    priority_label = Label(newprocess, text='Prioridade:')
+    priority_label.grid(row=3, column=0, padx=5, pady=10)
 
-  def check_if_all_fields_are_occupied():
-    filled = False
-    values = [  init_entry.get(),
-                exec_entry.get(),
-                dead_entry.get(),
-                pri_entry.get(),
-                "1"]
-    if "" not in values:
-      print("filled")
-      filled = True
-    return filled
-  
-  def clean_fields():
-    init_entry.delete(0, END)
-    exec_entry.delete(0, END)
-    dead_entry.delete(0, END)
-    pri_entry.delete(0, END)
+    init_entry = Entry(newprocess, text="Tempo de Entrada")
+    init_entry.grid(row=0, column=1, padx=5, pady=10)
+    exec_entry = Entry(newprocess, text="Tempo de Execução")
+    exec_entry.grid(row=1, column=1, padx=5, pady=10)
+    deadline_entry = Entry(newprocess, text="Deadline")
+    deadline_entry.grid(row=2, column=1, padx=5, pady=10)
+    priority_entry = Entry(newprocess, text="Prioridade")
+    priority_entry.grid(row=3, column=1, padx=5, pady=10)
 
-  def next_process():
-    nonlocal actual_process
-    init_entry.focus()
-    if check_if_all_fields_are_occupied():
-      if actual_process < num_process:
+    #método para submeter os dados do processo novo
+    def submitNewProcess():
+      global process_list
+      global process_id
+      init_time = init_entry.get()
+      exec_time = exec_entry.get()
+      deadline = deadline_entry.get()
+      priority = priority_entry.get()
+      process_temp = Process(process_id, exec_time, init_time, deadline, priority)
+      #abaixo: DataFrame temporário com os dados do processo a ser criado
+      process_tempDataFrame = pd.DataFrame([process_temp.returnData()])
+      #abaixo: Array de DataFrames, contendo a lista de processos e o novo processo
+      process_array = [process_list, process_tempDataFrame]
+      #abaixo: Concatena os dois dataframes em process_list
+      process_list = pd.concat(process_array)
+      process_id = process_id+1
+      newprocess.destroy()
 
-        process_data[str(actual_process)] = [  init_entry.get(),
-                exec_entry.get(),
-                dead_entry.get(),
-                pri_entry.get(),
-                "1"]
-        actual_process += 1
-        if actual_process < num_process:
-          label_process.configure(text=f'ID: {actual_process}')
-          clean_fields()   
-    else:
-      messagebox.showinfo(message="Você não preencheu todos os campos!")
+    submit_button = Button(newprocess, text="Criar Processo", command=submitNewProcess)
+    submit_button.grid(row=4, column=0, columnspan=2)
 
-  next = Button(root, text="Próximo", command=next_process)
-  next.place(x=x_position+225, y=y_position+175)
+  newprocess_button = Button(manage_frame, text="Criar Processo", command=newProcess)
+  newprocess_button.grid(row=3, column=0, padx=10, pady=10)
 
-  label_scheduler = Label(root, text="Escalonador de Processos")
-  label_scheduler.place(x=x_position, y=y_position+230)
+  def killProcess():
+    endprocess = Tk()
+    endprocess.tittle("Eliminar processo")
+    endprocess.geometry("400x100")
+    endprocess.configure(bg='#d1d1d1')
 
-  process = StringVar()
-  process.set('FIFO')
-  proc_menu = OptionMenu(root, process, "FIFO", "SJF", "RR", "EDF")
-  proc_menu.place(x=x_position+180, y=y_position+230)
+  endprocess_button = Button(manage_frame, text="Eliminar Processo", command=killProcess)
+  endprocess_button.grid(row=3, column=1, padx=10, pady=10)
 
-  def transfer_data():
-    if len(process_data) == num_process - 1 and check_if_all_fields_are_occupied():
-      nonlocal actual_process
-      process_data[str(actual_process)] = [  init_entry.get(),
-                exec_entry.get(),
-                dead_entry.get(),
-                pri_entry.get(),
-                "1"]
-      actual_process += 1
-    elif len(process_data) != num_process:
-      messagebox.showinfo(message="Ainda falta cadastrar processos!")
-      return
-    
-    process_algorithm = process.get()
-    root.destroy()
-    scheduler_window(num_process, quantum, overload, process_data, process_algorithm)
+  #botão para executar o simulador de processos
+  start_button = Button(manage_frame, text="Iniciar simulação", command=submitProcessData)
+  start_button.grid(row=3, column=4, padx=10, pady=10)
 
-  proceed = Button(root, text="Simular", command=transfer_data)
-  proceed.place(x=x_position+100, y=y_position+330)
+  root.mainloop()
 
-def scheduler_window(num_process, quantum, overload, dataProcess, process_algorithm):
-  y_position = 40
-  x_position = 200
-
-  process_window = Tk()
-  screen_width = process_window.winfo_screenwidth()
-  screen_height = process_window.winfo_screenheight()
-  process_window.title("Escalonador de Processos")
-  process_window.geometry(f'{screen_width}x{screen_height}')
-  process_window.configure(bg="#cf9416")
-
-  box_width = 2
-  info_n_rows = num_process
-  info_n_columns = 6
-  info_table = pd.DataFrame(index=np.arange(info_n_rows), columns=np.arange(info_n_columns))
-
-  progress_y = y_position + 150
-  progress_n_rows = num_process
-  progress_n_columns = 50
-  progress_table = pd.DataFrame(index=np.arange(progress_n_rows), columns=np.arange(progress_n_columns))
-
-  for i in range(progress_n_rows):
-    for j in range(progress_n_columns):
-      progress_table.loc[i, j] = Entry(process_window, width=1, fg='black', font=('Arial', 16, 'bold'))
-      if j == 0:
-        progress_table.loc[i, j].grid(row=i, column=j, padx=[x_position,0])
-      else:
-        progress_table.loc[i, j].grid(row=i, column=j)
-      
-      if i == 0:
-        progress_table.loc[i, j].grid(row=i, column=j, pady=(progress_y, 0))
-
-  y = progress_y + 5
-  for k in range(num_process):
-    lb = Label(process_window, text=str[k], font=("Arial", 8))
-    lb.place(x=x_position-30, y=y)
-    y = y + 28
-    lb.configure(bg="#cf9416")
-
-  guide_exec = Entry(process_window, width=box_width, fg="black", font=('Arial', 8))
-  guide_exec.grid(row=0, column= 0, padx=[x_position-100])
-  guide_exec.configure(bg="Green")
-  guide_exec_lb = Label(process_window, text="Executando", font=('Arial', 8))
-  guide_exec_lb.place(x=x - 80, y=95)
-  guide_exec_lb.configure(bg='#cf9416')
-
-  guide_exec = Entry(process_window, width=box_width, fg="black", font=('Arial', 8))
-  guide_exec.grid(row=0, column= 0, padx=[x_position-100], pady=[30,0])
-  guide_exec.configure(bg="Gray")
-  guide_exec_lb = Label(process_window, text="Espera", font=('Arial', 8))
-  guide_exec_lb.place(x=x - 80, y=113)
-  guide_exec_lb.configure(bg='#cf9416')
-
-  guide_exec = Entry(process_window, width=box_width, fg="black", font=('Arial', 8))
-  guide_exec.grid(row=0, column= 0, padx=[x_position-100], pady=[60,0])
-  guide_exec.configure(bg="Red")
-  guide_exec_lb = Label(process_window, text="Overload", font=('Arial', 8))
-  guide_exec_lb.place(x=x - 80, y=129)
-  guide_exec_lb.configure(bg='#cf9416')
-
-  guide_exec = Entry(process_window, width=box_width, fg="black", font=('Arial', 8))
-  guide_exec.grid(row=0, column= 0, padx=[x_position-100], pady=[90,0])
-  guide_exec.configure(bg="Blue")
-  guide_exec_lb = Label(process_window, text="Estouro", font=('Arial', 8))
-  guide_exec_lb.place(x=x - 80, y=143)
-  guide_exec_lb.configure(bg='#cf9416')
-
-  x = x_position
-  for k in range(progress_n_columns+1):
-    lb = Label(process_window, text=str[k], font=('Arial', 8))
-    lb.place(x=x, y=progress_y-22)
-    if k<10:
-      x+=15
-    else:
-      x+=16
-    lb.configure(bg='#cf9416')
-
-  var = tk.IntVar()
-  var.set(0)
-
-  def Step():
-    var.set(0)
-    return
-  def Auto():
-    var.set(1)
-    return
-  def call_open2():
-    process_window.destroy()
-    window()
-
-  step = Button(process_window, text=" passo-a-passo ", command=Step)
-  step.place(x=x_position, y=progress_y - 90)
-
-  stop = Button(process_window, text=" Pause ", command=Step)
-  stop.place(x=x_position + 120, y=progress_y - 90)
-
-  proceed = Button(process_window, text=" total ", command=Auto)
-  proceed.place(x=x_position+190, y=progress_y - 90)
-
-  turn_arround_label = Label(process_window, text='', font=('Arial', 13))
-  turn_arround_label.place(x=x_position+290, y=progress_y - 90)
-  turn_arround_label.configure(bg='#cf9416')
-
-  voltar = Button(process_window, text=' Voltar ', command=call_open2)
-  voltar.place(x=x_position, y=progress_y-55)
-
-  #Local onde a classe Process é usada
-  ProcessArray = [Process.process[process_data[str(i)][0],process_data[str(i)][1],process_data[str(i)][2]]]
-  process_interface_packpage = [process_window, info_table, progress_table, step, stop, proceed]
-
-  fifo = Fifo(quantum, overload, process_interface_packpage)
-  sjf = Sjf(quantum, overload, process_interface_packpage)
-  rr = RoundRobin(quantum, overload, process_interface_packpage)
-  edf = Edf(quantum, overload, process_interface_packpage)
-
-  print(process_algorithm)
-  if process_algorithm == "FIFO":
-    fifo.Fifo(ProcessArray)
-  elif process_algorithm == "SJF":
-    sjf.Sjf(ProcessArray)
-  elif process_algorithm == "Round Robin":
-    rr.RoundRobin(ProcessArray)
-  elif process_algorithm == "EDF":
-    edf.Edf(ProcessArray)
   
