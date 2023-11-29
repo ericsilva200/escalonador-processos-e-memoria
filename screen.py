@@ -152,14 +152,14 @@ def root():
     status_label.grid(row=0, column=5, padx=15, pady=5)
 
     global process_list
-    process_total = len(process_list)
-    process_index = len(process_list.columns)
+    process_total = process_list.shape[0]
+    process_index = process_list.shape[1]
 
     for x in range(process_total):
       for y in range(process_index):
         data_temp = Entry(process_frame)
-        data_temp.grid(row=x, column=y, padx=5, pady=5)
-        data_temp.insert(END, process_list.loc[x, y])
+        data_temp.grid(row=x+1, column=y, padx=5, pady=5)
+        data_temp.insert(END, process_list.iloc[x, y])
 
 
 
