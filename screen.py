@@ -69,19 +69,20 @@ def root():
       process_listTemp = process.clock_exec(processor_clock)
       for x in range(process_total):
         #status: none, executando, finalizado, fila
-        if (process_listTemp.iloc[x,5] == "none"):
-          data_temp = Entry(gantt_frame, bg='#d3d3d3')
+        if (str(process_listTemp.iloc[x,5]) == "none"):
+          data_temp = Entry(gantt_frame, bg='#ffe338') #amarelo para não inicializado
           data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
-        elif (process_listTemp.iloc[x,5] == "executando"):
-          data_temp = Entry(gantt_frame, bg='#6f7276')
+        elif (str(process_listTemp.iloc[x,5]) == "executando"):
+          data_temp = Entry(gantt_frame, bg='#4caf50') #verde para executando
           data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
-        elif (process_listTemp.iloc[x,5] == "fila"):
-          data_temp = Entry(gantt_frame, bg='#18191a')
+        elif (str(process_listTemp.iloc[x,5]) == "fila"):
+          data_temp = Entry(gantt_frame, bg='#18191a') #preto para em fila
           data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
-        
-        processor_clock= processor_clock+1
+        elif (str(process_listTemp.iloc[x,5]) == "finalizado"):
+          data_temp = Entry(gantt_frame, bg='#1aa7ec') #azul para finalizado
+          data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
 
-      if (process.exec_check == 10):
+      if (process.exec_check == 0):
         processor_clock = 0
         break
 
