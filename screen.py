@@ -60,28 +60,29 @@ def root():
       process_label.insert(END, 'Processo ID ')
       process_label.insert(END, process_list.iloc[x, 0])
     
+    processor_clock = 0
     if (algorithm_exec == "FIFO"):
       process = Fifo(quantum, overload, process_list)
     
-    processor_clock = 0
     while (True):
       sleep(1)
-      process_listTemp = process.clock_exec()
+      process_listTemp = process.clock_exec(processor_clock)
       for x in range(process_total):
         #status: none, executando, finalizado, fila
         if (process_listTemp.iloc[x,5] == "none"):
-          data_temp = Entry(gantt_frame, bg='light-gray')
+          data_temp = Entry(gantt_frame, bg='#d3d3d3')
           data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
         elif (process_listTemp.iloc[x,5] == "executando"):
-          data_temp = Entry(gantt_frame, bg='green')
+          data_temp = Entry(gantt_frame, bg='#6f7276')
           data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
         elif (process_listTemp.iloc[x,5] == "fila"):
-          data_temp = Entry(gantt_frame, bg='dark-gray')
+          data_temp = Entry(gantt_frame, bg='#18191a')
           data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
         
         processor_clock= processor_clock+1
 
-      if (process.exec_check == 0):
+      if (process.exec_check == 10):
+        processor_clock = 0
         break
 
   #frame p/ gerenciar aplicação
@@ -153,6 +154,7 @@ def root():
       process_array = [process_list, process_tempDataFrame]
       process_list = pd.concat(process_array)
       process_id = process_id+1
+      print(process_list) #para troubleshoot
       processListingTable()
       newprocess.destroy()
 
