@@ -14,7 +14,8 @@ class Fifo:
     self.exec_check = 0
   #process_list = pd.DataFrame(columns=['process_id', 'exec_time', 'init_time', 'deadline', 'priority', 'status'])
   def clock_exec(self, clock):
-    self.exec_check = 0
+    self.exec_check = 0 #sempre resetar essa variável para zero quando o método for acessado
+    #loop para reduzir o valor do init_time em 1 e, caso chegue em 0, o processo terá ido para a fila.
     for x in range(self.process_total):
       currentProcessinit_time = self.process_list.iat[x, 2]
       if (int(currentProcessinit_time) - 1 >= 0):
@@ -23,10 +24,11 @@ class Fifo:
         self.process_list.iat[x,5] = "fila"
         self.queue += [self.process_list.iat[x,0]]
 
+    #lógica do FIFO
     if (self.processing == False):
       #se não tiver nada em execução, muda o primeiro processo da fila para em execução
       try:
-        self.processing_id = int(self.queue[0])
+        self.processing_id = int(self.queue[0]) #garante que a fila não está vazia.
         index_process = 0
         for x in range(self.process_total):
           if (self.processing_id == self.process_list.iat[x, 0]):
