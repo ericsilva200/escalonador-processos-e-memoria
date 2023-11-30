@@ -21,6 +21,9 @@ class Fifo:
           break
 
     #loop para reduzir o valor do init_time em 1 e, caso chegue em 0, o processo terá ido para a fila.
+    print(f"DEBUG - Inicio do clock {clock}\nFila: {self.queue}")
+    print(self.process_list)
+    
     for x in range(self.process_total):
       currentProcessinit_time = self.process_list.iat[x, 2]
       if (int(currentProcessinit_time) - 1 >= 0):
@@ -55,5 +58,8 @@ class Fifo:
     for x in range(self.process_total):
         temp_value = self.process_list.iloc[x,1]
         self.exec_check = self.exec_check + int(temp_value)
+
+    print(f"DEBUG - Fim do clock {clock}\nFila: {self.queue}")
+    print(self.process_list)
 
     return self.process_list
