@@ -1,144 +1,94 @@
-import time
-import numpy as np
 from os import system, name
-from time import sleep
-
-import tkinter as tk
-from tkinter import *
-from tkinter import ttk 
+import pandas as pd
 
 class RoundRobin:
-  def __init__(self, Quantum, Overload, process_interface):
-    self.Quantum = Quantum
-    self.Overload = Overload
-    self.process_window = process_interface[0]
-    self.progress_table = process_interface[2]
-    self.var = process_interface[6]
-    self.TurnAroundLabel = process_interface[7]
+  def __init__(self, quantum, overload, process_list):
+    self.quantum = quantum
+    self.overload = overload
+    self.process_list = process_list
+    self.process_total = process_list.shape[0] #quantidade de processos
+    self.process_index = process_list.shape[1] #quantidade de atributos do processo
+    self.processing = False #checa para garantir que não tem nada executando
+    self.processing_id = -1 #id do processo em execução. -1 significa que o processador tá livre
+    self.queue = []
+    self.quantumcheck = 0 #contador de quantum
+    self.overloadcheck = 0
+    self.exec_check = 0
+  #process_list = pd.DataFrame(columns=['process_id', 'exec_time', 'init_time', 'deadline', 'priority', 'status'])
+  def clock_exec(self, clock):
+    self.exec_check = 0 #sempre resetar essa variável para zero quando o método for acessado
+    for x in range(self.process_total):
+        if (str(self.process_list.iat[x, 5]) == "finalizando"):
+          self.process_list.iat[x, 5] = "finalizado"
+          break
 
-  def TurnAround(self, ProcessList):
-    Turnaround = 0
-    for process in ProcessList:
-      Turnaround += process.WaitTime + process.ExecutionTime
+    #loop para reduzir o valor do init_time em 1 e, caso chegue em 0, o processo terá ido para a fila.
+    print(f"DEBUG - Inicio do clock {clock}\nFila: {self.queue}\nQuantum: {self.quantumcheck}")
+    print(self.process_list)
+    for x in range(self.process_total):
+      currentProcessinit_time = self.process_list.iat[x, 2]
+      if (int(currentProcessinit_time) - 1 >= 0):
+        self.process_list.iat[x, 2] = int(currentProcessinit_time) - 1
+      if (self.process_list.iat[x,2] == 0) and (self.process_list.iat[x,5] == "none"):
+        self.process_list.iat[x,5] = "fila"
+        self.queue += [self.process_list.iat[x,0]]
 
-    self.TurnAroundLabel.config(text="TURNROUND - " + str(Turnaround/ProcessList.size))
-    return Turnaround/ProcessList.size
-  
-  def RoundRobin(self, ProcessArray):
-    WorkingArray = np.array([])
+    #lógica do RoundRobin
+    if (self.processing == False):
+      #se não tiver nada em execução, muda o primeiro processo da fila para em execução
+      try:
+        self.processing_id = int(self.queue[0]) #garante que a fila não está vazia.
+        index_process = 0
+        for x in range(self.process_total):
+          if (self.processing_id == self.process_list.iat[x, 0]):
+            index_process = x
+        self.process_list.iat[index_process, 5] = "executando"
+        self.queue.pop(0)
+        self.processing = True
+      except: print("Nada na fila")
+    #subtrai 1 do exec_time do processo em execução e, se o quantum atingir o limite, muda o status para sobrecarga
+    if (self.processing_id != -1):
+      for x in range(self.process_total):
+          if (self.processing_id == self.process_list.iat[x, 0]):
+            index_process = x
+      #check de sobrecarga
+      if (self.quantumcheck == self.quantum):
+        self.process_list.iat[index_process, 5] = "sobrecarga"
+        self.overloadcheck = self.overloadcheck+1
+        #se o tempo de sobrecarga foi atingido, reseta o quantum e retorna o processo pro final da fila.
+        if (self.overloadcheck > self.overload):
+          self.quantumcheck = 0
+          self.overloadcheck = 0
+          self.queue += [self.processing_id]
+          self.process_list.iat[index_process, 5] = "fila"
+          try:
+            self.processing_id = int(self.queue[0]) #garante que a fila não está vazia.
+            index_process = 0
+            for x in range(self.process_total):
+              if (self.processing_id == self.process_list.iat[x, 0]):
+                index_process = x
+            self.process_list.iat[index_process, 5] = "executando"
+            self.queue.pop(0)
+            self.processing = True
+          except:
+            print("Nada na fila")
+            self.processing_id = -1
+            self.processing = False
 
-    for process in ProcessArray:
-      WorkingArray = np.append(WorkingArray, process.clone())
-
-    CopyArray = np.array(WorkingArray)
-    TotalTime = 0
-    ProcessCount = WorkingArray.size
-    ExecutingProcess = None
-    ReadyList = np.array([])
-    Overloading = False
-    OverloadTime = self.Overload
-
-    #Execução
-    while ProcessCount != 0:
-      for process in WorkingArray: #Colocar na lista de pronto
-        if process.StartTime <= TotalTime:
-          ReadyList = np.append(ReadyList, process)
-          WorkingArray = np.delete(WorkingArray, np.where(WorkingArray == process))
-          for i in range(TotalTime):
-            process.PrintList.append(" ")
-
-      if ExecutingProcess == None: #Se nenhum estiver sendo executado, escolhe o primeiro do pronto
-        for process in ReadyList:
-            ExecutingProcess = process   
-            break
-
-      TotalTime += 1
-
-      if not Overloading:
-        if ExecutingProcess != None:
-          self.progress_table.loc[int(ExecutingProcess.ProcessId), TotalTime-1].configure({"background":'Green'})
-          for process in ReadyList:
-            if process != ExecutingProcess:
-              self.progress_table.loc[int(ExecutingProcess.ProcessId), TotalTime-1].configure({"background":'Grey'})
-            self.process_window.update()
-        
-        try:
-          ExecutingProcess.ExecutedTime += 1
-          ExecutingProcess.ExecutionTimePerQuantum += 1
-          ExecutingProcess.PrintList.append("X")
-
-
-          if ExecutingProcess.ExecutedTime == ExecutingProcess.ExecutionTime:
-            ReadyList = np.delete(ReadyList, np.where(ReadyList == ExecutingProcess))
-            ExecutingProcess = None
-            ProcessCount -=1
-
-          elif ExecutingProcess.ExecutionTimePerQuantum == self.Quantum and self.Overload > 0:
-            ExecutingProcess.ExecutionTimePerQuantum = 0
-            Overloading = True
-            
-        except:
-          pass
-
-        for process in ReadyList:
-          if(process == ExecutingProcess) or (process.StartLine >= TotalTime):
-            continue
-          process.PrintList.append("0")
-          process.WaitTime += 1
-
+      #executa, subtraindo 1 do exec_time
       else:
-        self.progress_table.loc[int(ExecutingProcess.ProcessId), TotalTime-1].configure({"background":'Red'})
-        for process in ReadyList:
-          if process != ExecutingProcess:
-            self.progress_table.loc[int(ExecutingProcess.ProcessId), TotalTime-1].configure({"background":'Grey'})
-        self.process_window.update()
+        self.process_list.iat[index_process, 1] = int(self.process_list.iloc[index_process,1]) - 1
+        self.quantumcheck = self.quantumcheck +1
 
-        ReadyList = np.delete(ReadyList, np.where(ReadyList == ExecutingProcess))
-        ReadyList = np.append(ReadyList, ExecutingProcess)
-
-        for process in ReadyList:
-          if process.StartLine > TotalTime:
-            continue
-          process.PrintList.append("#")
-          process.WaitTime += 1
-        OverloadTime -= 1
-
-        if OverloadTime <= 0:
-          OverloadTime = self.Overload
-          ExecutingProcess = None
-          Overloading = False
-
-      for process in CopyArray:
-        for i in range(process.WaitTime + process.ExecutedTime + process.StartLine , TotalTime):
-          process.PrintList.append(" ")
-
-      self.PrintProcess(CopyArray, TotalTime)
-
-      if self.var.get() == 0:
-        self.process_window.wait_variable(self.var)
-
-    print(f"Tempo total: {str(TotalTime)}")
-    print(f'TURNAROUND: {str(self.TurnAround(CopyArray))}')
-    return
+      if (self.process_list.iloc[index_process,1] == 0):
+        self.process_list.iat[index_process, 5] = "finalizando"
+        self.processing_id = -1
+        self.processing = False
   
-  def PrintProcess(self, ProcessArray, TotalTime):
-    #Windows
-    if name == 'nt':
-      _ = system('cls')
-    #MAC LINUX
-    else:
-      _ = system('clear')
+    for x in range(self.process_total):
+        temp_value = self.process_list.iloc[x,1]
+        self.exec_check = self.exec_check + int(temp_value)
+    print(f"DEBUG - Fim do clock {clock}\nFila: {self.queue}\nQuantum: {self.quantumcheck}")
+    print(self.process_list)
 
-    for process in ProcessArray:
-      print(process.ProcessId, end="" )
-      if process.StartLine < TotalTime:
-        for j in range(TotalTime):
-          print(process.PrintList[j], end="" )
-        if not process.MetDeadline:
-          print(" ESTOUROU", end="")
-
-    self.process_window.update_idletasks()
-    time.sleep(1)
-    return
-
-      
+    return self.process_list

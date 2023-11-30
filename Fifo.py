@@ -15,6 +15,11 @@ class Fifo:
   #process_list = pd.DataFrame(columns=['process_id', 'exec_time', 'init_time', 'deadline', 'priority', 'status'])
   def clock_exec(self, clock):
     self.exec_check = 0 #sempre resetar essa variável para zero quando o método for acessado
+    for x in range(self.process_total):
+        if (str(self.process_list.iat[x, 5]) == "finalizando"):
+          self.process_list.iat[x, 5] = "finalizado"
+          break
+
     #loop para reduzir o valor do init_time em 1 e, caso chegue em 0, o processo terá ido para a fila.
     for x in range(self.process_total):
       currentProcessinit_time = self.process_list.iat[x, 2]
@@ -43,7 +48,7 @@ class Fifo:
             index_process = x
       self.process_list.iat[index_process, 1] = int(self.process_list.iloc[index_process,1]) - 1
       if (self.process_list.iloc[index_process,1] == 0):
-        self.process_list.iat[index_process, 5] = "finalizado"
+        self.process_list.iat[index_process, 5] = "finalizando"
         self.processing_id = -1
         self.processing = False
   

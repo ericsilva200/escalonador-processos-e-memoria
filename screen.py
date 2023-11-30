@@ -63,14 +63,18 @@ def root():
     processor_clock = 0
     if (algorithm_exec == "FIFO"):
       process = Fifo(quantum, overload, process_list)
+    elif (algorithm_exec == "RoundRobin"):
+      process = RoundRobin(quantum, overload, process_list)
     
     while (True):
       sleep(1)
       process_listTemp = process.clock_exec(processor_clock)
+      processor_clock = processor_clock+1
+
       for x in range(process_total):
-        #status: none, executando, finalizado, fila
+        #status: none, executando, finalizado, fila, sobrecarga
         if (str(process_listTemp.iloc[x,5]) == "none"):
-          data_temp = Entry(gantt_frame, bg='#ffe338') #amarelo para não inicializado
+          data_temp = Entry(gantt_frame) #branco para não inicializado
           data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
         elif (str(process_listTemp.iloc[x,5]) == "executando"):
           data_temp = Entry(gantt_frame, bg='#4caf50') #verde para executando
@@ -78,13 +82,20 @@ def root():
         elif (str(process_listTemp.iloc[x,5]) == "fila"):
           data_temp = Entry(gantt_frame, bg='#18191a') #preto para em fila
           data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
+        elif (str(process_listTemp.iloc[x,5]) == "finalizando"):
+          data_temp = Entry(gantt_frame, bg='#1aa7ec') #azul para finalizando
+          data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
         elif (str(process_listTemp.iloc[x,5]) == "finalizado"):
-          data_temp = Entry(gantt_frame, bg='#1aa7ec') #azul para finalizado
+          data_temp = Entry(gantt_frame) #branco para finalizando
+          data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
+        elif (str(process_listTemp.iloc[x,5]) == "sobrecarga"):
+          data_temp = Entry(gantt_frame, bg='#ff0000') #vermelho para sobrecarga
           data_temp.grid(row=x, column=processor_clock+1, padx=5, pady=5)
 
       if (process.exec_check == 0):
         processor_clock = 0
         break
+    del process
 
   #frame p/ gerenciar aplicação
   manage_frame = Frame(root, width=400, height=200)
@@ -94,7 +105,7 @@ def root():
   algorithm.set("FIFO")
   algorithm_label = Label(manage_frame, text="Algoritmo:")
   algorithm_label.grid(row=3, column=2)
-  algorithm_menu = OptionMenu(manage_frame, algorithm, "FIFO", "SJF", "RR", "EDF")
+  algorithm_menu = OptionMenu(manage_frame, algorithm, "FIFO", "SJF", "RoundRobin", "EDF")
   algorithm_menu.grid(row=3, column=3)
 
   quantum_label = Label(manage_frame, text="Quantum")
